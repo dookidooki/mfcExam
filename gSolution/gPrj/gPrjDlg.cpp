@@ -101,6 +101,9 @@ BOOL CgPrjDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
+
+	MoveWindow(0, 0, 1280, 800); // 대화 상자의 위치와 크기를 설정합니다. (x, y, width, height)
+
 	// 켜짐과	동시에
 	m_pDlgImage = new CDlgImage();  
 	// 1. 대화 상자 클래스 객체를 메모리에 할당합니다. (객체 생성)
