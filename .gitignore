@@ -1,0 +1,27 @@
+# 1. Visual Studio IDE 숨김 폴더 및 개인 설정 (필수)
+.vs/
+*.user
+*.aps
+*.suo
+*.db
+
+# 2. 빌드 및 컴파일 결과물이 담기는 폴더 (필수)
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# 3. 컴파일 과정에서 생기는 찌꺼기 및 최종 실행 파일
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.tlog
+*.exe
+*.dll
+*.lib
+
+# 4. 구형 버전 호환용 (기존 유지)
+*.VC.*
