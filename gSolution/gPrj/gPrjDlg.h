@@ -1,8 +1,10 @@
 ﻿
 // gPrjDlg.h: 헤더 파일
 //
+#include "CDlgImage.h"
 
 #pragma once
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 
 // CgPrjDlg 대화 상자
@@ -11,6 +13,9 @@ class CgPrjDlg : public CDialogEx
 // 생성입니다.
 public:
 	CgPrjDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
+	
+	CDlgImage* m_pDlgImage;
+
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -33,4 +38,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedBtnDlg();
+	afx_msg void OnDestroy();
+
+	void CallFunc(int n); // 대화 상자에서 호출할 함수 선언
 };

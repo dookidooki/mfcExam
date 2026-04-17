@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BTN_DLG, &CgPrjDlg::OnBnClickedBtnDlg)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -99,6 +100,17 @@ BOOL CgPrjDlg::OnInitDialog()
 	//  프레임워크가 이 작업을 자동으로 수행합니다.
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
+
+	// 켜짐과	동시에
+	m_pDlgImage = new CDlgImage();  
+	// 1. 대화 상자 클래스 객체를 메모리에 할당합니다. (객체 생성)
+	m_pDlgImage->Create(IDD_CDlgImage, this);  
+	// 2. 리소스를 불러와 윈도우 실체를 만들고 메인 창에 종속시킵니다. (관계 설정)
+	m_pDlgImage->ShowWindow(SW_SHOW); 
+	// 3. 생성된 대화 상자를 화면에 실제로 나타냅니다. (시각적 노출)
+
+
+
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
@@ -154,8 +166,25 @@ HCURSOR CgPrjDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
 void CgPrjDlg::OnBnClickedBtnDlg()
 {
-	// git test
+	m_pDlgImage->ShowWindow(SW_SHOW);
+	// 누를 때 마다 3. 생성된 대화 상자를 화면에 실제로 나타냅니다. (시각적 노출)
+}
+
+void CgPrjDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	delete m_pDlgImage;  // 대화 상자 클래스 객체를 메모리에서 해제합니다. (객체 소멸)
+}
+
+#include <iostream>
+void CgPrjDlg::CallFunc(int n)
+{
+	std::cout << "수신된 데이터: " << n << std::endl;
+
+	int nData = n;
+	// 출력 창(Output)에 결과 표시
+	TRACE(_T("데이터 수신 성공: %d\n"), nData);
 }
