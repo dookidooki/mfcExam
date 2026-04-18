@@ -42,5 +42,5 @@ public:
 	afx_msg void OnDestroy();
 
 	void CallFunc(int n); // 대화 상자에서 호출할 함수 선언
-	afx_msg void OnBnClickedBtnTest();
+	void OnBnClickedBtnTest();
 };

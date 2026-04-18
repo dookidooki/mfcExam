@@ -180,7 +180,8 @@ void CgPrjDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
-	delete m_pDlgImage;  // 대화 상자 클래스 객체를 메모리에서 해제합니다. (객체 소멸)
+	if(m_pDlgImage)	delete m_pDlgImage;          // 대화 상자 클래스 객체를 메모리에서 해제합니다. (객체 소멸)
+	if(m_pDlgImgResult)	delete m_pDlgImgResult;  // 대화 상자 클래스 객체를 메모리에서 해제합니다. (객체 소멸)
 }
 
 void CgPrjDlg::CallFunc(int n)
@@ -193,39 +194,44 @@ void CgPrjDlg::CallFunc(int n)
 }
 
 
-void CgPrjDlg::OnBnClickedBtnTest()
-{
+void CgPrjDlg::OnBnClickedBtnTest() {
+
 	// 1. 이미지 데이터의 시작 지점(포인터)을 가져옵니다.
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
 
 	// 2. 이미지의 가로, 세로 크기와 데이터 한 줄의 길이(Pitch)를 파악합니다.
 	int nWidth = m_pDlgImage->m_image.GetWidth();
 	int nHeight = m_pDlgImage->m_image.GetHeight();
-	int nPitch = m_pDlgImage->m_image.GetPitch(); 
+	int nPitch = m_pDlgImage->m_image.GetPitch();
 
 	// 3. 화면에 랜덤하게 100개의 검은 점을 찍습니다.
 	for (int k = 0; k < 100; k++) {
-		int x = rand() % nWidth; 
-		int y = rand() % nHeight; 
-		// y * nPitch + x 공식으로 정확한 픽셀 위치를 찾아 0(검은색)을 대입합니다.
-		fm[y * nPitch + x] = 0;
-	}
-	
-	// 4. 이미지 전체를 훑으며 검은 점의 개수와 좌표를 찾아냅니다.
-	int nSum = 0;
-	for (int y = 0; y < nHeight; y++) {
-		for (int x = 0; x < nWidth; x++) {
-			if (fm[y * nPitch + x] == 0) { 
-				cout << nSum << " : (" << x << "," << y << ")" << endl; // 해당 좌표를 콘솔에 출력
-				nSum++; // 검은 점 발견 시 카운트 증가
+		int i = rand() % nWidth;
+		int j = rand() % nHeight;
+		fm[j * nPitch + i] = 0; // 검은 점. 위치는 랜덤하게 결정됩니다.
 
+
+		// fm[y * nPitch + x + 1] = 0; // 검은 점. 위치는 y * nPitch + x 에서 오른쪽으로 한 칸 이동한 곳입니다.	
+		// fm[y + 1 * nPitch + x] = 0; // 검은 점. 위치는 y * nPitch + x 에서 아래로 한 칸 이동한 곳입니다.
+		// fm[y + 1 * nPitch + x + 1] = 0; // 검은 점. 위치는 y * nPitch + x 에서 대각선으로 한 칸 이동한 곳입니다.
+			
+	}
+
+	// 4.지정한 점마다 타원 그리기
+	int nIndex = 0;
+	for (int j = 0; j < nHeight; j++) {
+		for (int i = 0; i < nWidth; i++) {
+			if (fm[j * nPitch + i] == 0) {
+				if (m_pDlgImgResult->m_nDataCount < 100) {        // 첫번째 100개의 점에 대해서만 처리하도록 제한합니다.
+					m_pDlgImgResult->m_ptData[nIndex].x = i;   
+					m_pDlgImgResult->m_ptData[nIndex].y = j; 
+					m_pDlgImgResult->m_nDataCount = ++nIndex;
+				}
 			}
 		}
-	}
-		
-	// 5. 최종적으로 발견된 검은 점의 총 개수를 출력합니다.
-	cout << "full dot count: " << nSum << endl; 
 
-	// 6. 데이터는 바뀌었지만 화면은 아직 옛날 상태이므로, 화면을 다시 그리라고 명령합니다.
-	m_pDlgImage->Invalidate();
+		// 5. 대화 상자에 그려진 이미지를 갱신하여 변경된 내용을 화면에 반영합니다.
+		m_pDlgImage->Invalidate();
+		m_pDlgImgResult->Invalidate();
+	}
 }

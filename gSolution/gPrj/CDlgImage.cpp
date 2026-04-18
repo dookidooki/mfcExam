@@ -58,13 +58,41 @@ BOOL CDlgImage::OnInitDialog()
 
 	void CDlgImage::OnPaint()
 	{
-		CPaintDC dc(this); // device context for painting
-		// TODO: 여기 에 메시지 처리기 코드를 추가합니다.
+		CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
+		// 디바이스 컨텍스트란? 그리기 작업을 수행하기 위한 객체로, 화면이나 프린터 등 다양한 출력 장치에 그래픽을 그릴 수 있도록 도와줍니다.
+		
 		// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
 		if (!m_image.IsNull()) {
 			m_image.Draw(dc, 0, 0); // 이미지 객체의 Draw 함수를 사용하여 대화 상자에 이미지를 그립니다.
-		}
+		} 
+
+		drawData(&dc); // 대화 상자에서 데이터를 그리는 사용자 정의 함수 호출
+
+
 	}
+
+	void CDlgImage::drawData(CDC* pDC)
+	{
+		//CRect rect(0, 0, 150, 100);
+		//pDC->Ellipse(rect); // 타원을 그립니다. rect는 타원의 경계 사각형을 정의합니다. (0, 0)에서 시작하여 너비 150, 높이 100인 사각형입니다.	
+		
+		CRect rect;
+
+		CPen pen;
+		pen.CreatePen(PS_SOLID, 5, RGB(0xff, 0, 0)); // 펜 객체 생성 - 빨간색 실선, 두께 5
+		CPen* pOldPen = pDC->SelectObject(&pen); // 펜 객체를 디바이스 컨텍스트에 선택하여 사용 준비
+
+		for (int i = 0; i < m_nDataCount; i++) {
+			rect.SetRect(m_ptData[i], m_ptData[i]);
+			//rect.InflateRect(2, 4); // 타원의 크기를 확대합니다. (2, 4)만큼 사각형을 확장
+			//rect.InflateRect(4, 2); // 타원의 크기를 확대합니다. (4, 2)만큼 사각형을 확장
+			rect.InflateRect(2, 2); // 원의 크기를 확대합니다. (2, 2)만큼 사각형을 확장
+			pDC->Ellipse(rect); // 타원을 그립니다. rect는 타원의 경계 사각형을 정의합니다. (0, 0)에서 시작하여 너비 150, 높이 100인 사각형입니다.	
+		}
+
+		pDC->SelectObject(pOldPen); // 원래의 펜 객체로 복원하여 디바이스 컨텍스트를 정리합니다.
+	}
+
 
 	void CDlgImage::InitImage()
 	{
@@ -91,3 +119,4 @@ BOOL CDlgImage::OnInitDialog()
 		memset(fm, 0xff, nWidth * nHeight);
 		// 이미지의 모든 픽셀을 흰색으로 초기화 (0xff는 255로, 팔레트에서 255번 색상은 흰색입니다.)
 	}
+

@@ -14,6 +14,8 @@ public:
 
 	CImage m_image;				// CImage 객체를 멤버 변수로 선언
 	CWnd* m_pParent;			//	부모 대화 상자 포인터를 멤버 변수로 선언
+	int m_nDataCount=0;			// 데이터 개수를 저장하는 멤버 변수 선언
+	CPoint m_ptData[100];		// 데이터 좌표를 저장하는 배열 멤버 변수 선언 (최대 100개까지 저장 가능)
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -29,4 +31,5 @@ public:
 	afx_msg void OnPaint();
 
 	void InitImage();
+	void drawData(CDC* pDC);
 };
