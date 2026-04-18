@@ -6,7 +6,6 @@
 #include "afxdialogex.h"
 #include "CDlgImage.h"
 
-
 // CDlgImage 대화 상자
 
 IMPLEMENT_DYNAMIC(CDlgImage, CDialogEx)
@@ -71,15 +70,17 @@ BOOL CDlgImage::OnInitDialog()
 
 	}
 
+
+
 	void CDlgImage::drawData(CDC* pDC)
 	{
-		//CRect rect(0, 0, 150, 100);
-		//pDC->Ellipse(rect); // 타원을 그립니다. rect는 타원의 경계 사각형을 정의합니다. (0, 0)에서 시작하여 너비 150, 높이 100인 사각형입니다.	
+		//CRect rect(0, 0, 150, MAX_POINTS);
+		//pDC->Ellipse(rect); 	
 		
 		CRect rect;
 
 		CPen pen;
-		pen.CreatePen(PS_SOLID, 5, RGB(0xff, 0, 0)); // 펜 객체 생성 - 빨간색 실선, 두께 5
+		pen.CreatePen(PS_SOLID, 5, COLOR_GREEN); // 펜 객체 생성 - 초록색, 두께 5
 		CPen* pOldPen = pDC->SelectObject(&pen); // 펜 객체를 디바이스 컨텍스트에 선택하여 사용 준비
 
 		for (int i = 0; i < m_nDataCount; i++) {
@@ -87,11 +88,12 @@ BOOL CDlgImage::OnInitDialog()
 			//rect.InflateRect(2, 4); // 타원의 크기를 확대합니다. (2, 4)만큼 사각형을 확장
 			//rect.InflateRect(4, 2); // 타원의 크기를 확대합니다. (4, 2)만큼 사각형을 확장
 			rect.InflateRect(2, 2); // 원의 크기를 확대합니다. (2, 2)만큼 사각형을 확장
-			pDC->Ellipse(rect); // 타원을 그립니다. rect는 타원의 경계 사각형을 정의합니다. (0, 0)에서 시작하여 너비 150, 높이 100인 사각형입니다.	
+			pDC->Ellipse(rect); // 타원을 그립니다. 	
 		}
 
 		pDC->SelectObject(pOldPen); // 원래의 펜 객체로 복원하여 디바이스 컨텍스트를 정리합니다.
 	}
+
 
 
 	void CDlgImage::InitImage()

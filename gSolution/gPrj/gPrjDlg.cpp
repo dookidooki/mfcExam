@@ -204,25 +204,34 @@ void CgPrjDlg::OnBnClickedBtnTest() {
 	int nHeight = m_pDlgImage->m_image.GetHeight();
 	int nPitch = m_pDlgImage->m_image.GetPitch();
 
-	// 3. 화면에 랜덤하게 100개의 검은 점을 찍습니다.
-	for (int k = 0; k < 100; k++) {
-		int i = rand() % nWidth;
-		int j = rand() % nHeight;
-		fm[j * nPitch + i] = 0; // 검은 점. 위치는 랜덤하게 결정됩니다.
+	// 3. 검은색(0)으로 배경 초기화
+	memset(fm, 0, nWidth * nHeight);
 
+	// 4. 결과창 데이터 개수 리셋 (필수!)
+	m_pDlgImgResult->m_nDataCount = 0;
+
+	// 5. 화면에 랜덤한 위치에 랜덤한 밝기로 점 찍기 (100개)
+	for (int k = 0; k < MAX_POINTS; k++) {
+		int i = rand() % nWidth; // 랜덤한 x 좌표 생성 (0부터 nWidth-1 사이의 값)
+		int j = rand() % nHeight; // 랜덤한 y 좌표 생성 (0부터 nHeight-1 사이의 값)
+		fm[j * nPitch + i] = (rand() % 0xff) + 1; // 랜덤한 밝기의 점 
 
 		// fm[y * nPitch + x + 1] = 0; // 검은 점. 위치는 y * nPitch + x 에서 오른쪽으로 한 칸 이동한 곳입니다.	
 		// fm[y + 1 * nPitch + x] = 0; // 검은 점. 위치는 y * nPitch + x 에서 아래로 한 칸 이동한 곳입니다.
 		// fm[y + 1 * nPitch + x + 1] = 0; // 검은 점. 위치는 y * nPitch + x 에서 대각선으로 한 칸 이동한 곳입니다.
-			
+
 	}
 
-	// 4.지정한 점마다 타원 그리기
+	// 6.지정한 점마다 타원 그리기
+	int nThreshold = 100; // 밝기가 100보다 큰 점을 찾기 위한 임계값입니다.
 	int nIndex = 0;
 	for (int j = 0; j < nHeight; j++) {
 		for (int i = 0; i < nWidth; i++) {
-			if (fm[j * nPitch + i] == 0) {
-				if (m_pDlgImgResult->m_nDataCount < 100) {        // 첫번째 100개의 점에 대해서만 처리하도록 제한합니다.
+			if (fm[j * nPitch + i] > nThreshold) {							// 밝기가 100보다 큰 점을 찾습니다. (검은색이 아닌 점)
+				if (m_pDlgImgResult->m_nDataCount < MAX_POINTS) {		   // 결과창에 저장할 데이터 개수 제한 (최대100개)
+
+					cout << m_pDlgImgResult->m_nDataCount + 1 << "(" << i << "," << j << ")" << endl; // 콘솔 창에 점의 좌표와 데이터 개수를 출력합니다.
+
 					m_pDlgImgResult->m_ptData[nIndex].x = i;   
 					m_pDlgImgResult->m_ptData[nIndex].y = j; 
 					m_pDlgImgResult->m_nDataCount = ++nIndex;
@@ -230,7 +239,7 @@ void CgPrjDlg::OnBnClickedBtnTest() {
 			}
 		}
 
-		// 5. 대화 상자에 그려진 이미지를 갱신하여 변경된 내용을 화면에 반영합니다.
+		// 7. 대화 상자에 그려진 이미지를 갱신하여 변경된 내용을 화면에 반영합니다.
 		m_pDlgImage->Invalidate();
 		m_pDlgImgResult->Invalidate();
 	}
