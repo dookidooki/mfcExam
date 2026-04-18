@@ -25,7 +25,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedBtnUpParent();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 

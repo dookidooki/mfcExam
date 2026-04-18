@@ -15,11 +15,12 @@ public:
 	CgPrjDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
 	
 	CDlgImage* m_pDlgImage;
+	CDlgImage* m_pDlgImgResult;
 
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_GPRJ_DIALOG };
+	enum { IDD = IDD_GPRJ_DIALOG }; 
 #endif
 
 	protected:
@@ -37,8 +38,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedBtnDlg();
+//	afx_msg void OnBnClickedBtnDlg();
 	afx_msg void OnDestroy();
 
 	void CallFunc(int n); // 대화 상자에서 호출할 함수 선언
+	afx_msg void OnBnClickedBtnTest();
 };

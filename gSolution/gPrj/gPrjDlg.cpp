@@ -1,4 +1,4 @@
-﻿
+
 // gPrjDlg.cpp: 구현 파일
 //
 
@@ -8,10 +8,14 @@
 #include "gPrjDlg.h"
 #include "afxdialogex.h"
 
+#include <iostream>
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+using namespace std;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -65,8 +69,8 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BTN_DLG, &CgPrjDlg::OnBnClickedBtnDlg)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BTN_TEST, &CgPrjDlg::OnBnClickedBtnTest)
 END_MESSAGE_MAP()
 
 
@@ -105,13 +109,15 @@ BOOL CgPrjDlg::OnInitDialog()
 	MoveWindow(0, 0, 1280, 800); // 대화 상자의 위치와 크기를 설정합니다. (x, y, width, height)
 
 	// 켜짐과	동시에
-	m_pDlgImage = new CDlgImage();  
-	// 1. 대화 상자 클래스 객체를 메모리에 할당합니다. (객체 생성)
-	m_pDlgImage->Create(IDD_CDlgImage, this);  
-	// 2. 리소스를 불러와 윈도우 실체를 만들고 메인 창에 종속시킵니다. (관계 설정)
-	m_pDlgImage->ShowWindow(SW_SHOW); 
-	// 3. 생성된 대화 상자를 화면에 실제로 나타냅니다. (시각적 노출)
+	m_pDlgImage = new CDlgImage();			// 1. (객체 생성)
+	m_pDlgImage->Create(IDD_CDlgImage, this);   	// 2. (관계 설정)
+	m_pDlgImage->ShowWindow(SW_SHOW);		// 3.  (시각적 노출)
+	m_pDlgImage->MoveWindow(0, 0, 640, 480); // 대화 상자의 위치와 크기를 설정합니다. (x, y, width, height)
 
+	m_pDlgImgResult = new CDlgImage();			// 1. (객체 생성)
+	m_pDlgImgResult->Create(IDD_CDlgImage, this);   	// 2. (관계 설정)
+	m_pDlgImgResult->ShowWindow(SW_SHOW);		// 3.  (시각적 노출)
+	m_pDlgImgResult->MoveWindow(640, 0, 640, 480); // 대화 상자의 위치와 크기를 설정합니다. (x, y, width, height)
 
 
 
@@ -169,11 +175,6 @@ HCURSOR CgPrjDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CgPrjDlg::OnBnClickedBtnDlg()
-{
-	m_pDlgImage->ShowWindow(SW_SHOW);
-	// 누를 때 마다 3. 생성된 대화 상자를 화면에 실제로 나타냅니다. (시각적 노출)
-}
 
 void CgPrjDlg::OnDestroy()
 {
@@ -182,12 +183,49 @@ void CgPrjDlg::OnDestroy()
 	delete m_pDlgImage;  // 대화 상자 클래스 객체를 메모리에서 해제합니다. (객체 소멸)
 }
 
-#include <iostream>
 void CgPrjDlg::CallFunc(int n)
 {
-	std::cout << "수신된 데이터: " << n << std::endl;
+	cout << "수신된 데이터: " << n << endl;
 
 	int nData = n;
 	// 출력 창(Output)에 결과 표시
 	TRACE(_T("데이터 수신 성공: %d\n"), nData);
+}
+
+
+void CgPrjDlg::OnBnClickedBtnTest()
+{
+	// 1. 이미지 데이터의 시작 지점(포인터)을 가져옵니다.
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+
+	// 2. 이미지의 가로, 세로 크기와 데이터 한 줄의 길이(Pitch)를 파악합니다.
+	int nWidth = m_pDlgImage->m_image.GetWidth();
+	int nHeight = m_pDlgImage->m_image.GetHeight();
+	int nPitch = m_pDlgImage->m_image.GetPitch(); 
+
+	// 3. 화면에 랜덤하게 100개의 검은 점을 찍습니다.
+	for (int k = 0; k < 100; k++) {
+		int x = rand() % nWidth; 
+		int y = rand() % nHeight; 
+		// y * nPitch + x 공식으로 정확한 픽셀 위치를 찾아 0(검은색)을 대입합니다.
+		fm[y * nPitch + x] = 0;
+	}
+	
+	// 4. 이미지 전체를 훑으며 검은 점의 개수와 좌표를 찾아냅니다.
+	int nSum = 0;
+	for (int y = 0; y < nHeight; y++) {
+		for (int x = 0; x < nWidth; x++) {
+			if (fm[y * nPitch + x] == 0) { 
+				cout << nSum << " : (" << x << "," << y << ")" << endl; // 해당 좌표를 콘솔에 출력
+				nSum++; // 검은 점 발견 시 카운트 증가
+
+			}
+		}
+	}
+		
+	// 5. 최종적으로 발견된 검은 점의 총 개수를 출력합니다.
+	cout << "full dot count: " << nSum << endl; 
+
+	// 6. 데이터는 바뀌었지만 화면은 아직 옛날 상태이므로, 화면을 다시 그리라고 명령합니다.
+	m_pDlgImage->Invalidate();
 }
