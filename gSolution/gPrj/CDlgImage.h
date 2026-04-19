@@ -2,7 +2,7 @@
 
 #include "afxdialogex.h"
 
-#define MAX_POINTS 100 // 최대 데이터 포인트 수를 정의합니다.
+#define MAX_POINTS 100000 // 최대 데이터 포인트 수를 정의합니다.
 
 // CDlgImage 대화 상자
 
@@ -18,6 +18,8 @@ public:
 	CWnd* m_pParent;			//	부모 대화 상자 포인터를 멤버 변수로 선언
 	int m_nDataCount=0;			// 데이터 개수를 저장하는 멤버 변수 선언
 	CPoint m_ptData[MAX_POINTS];		// 데이터 좌표를 저장하는 배열 멤버 변수 선언 (최대 MAX_POINTS개까지 저장 가능)
+	int m_nCircleSize = 5; 				// 원의 크기를 저장하는 멤버 변수 선언
+
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME

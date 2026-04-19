@@ -43,4 +43,9 @@ public:
 
 	void CallFunc(int n); // 대화 상자에서 호출할 함수 선언
 	void OnBnClickedBtnTest();
+	afx_msg void OnBnClickedBtnProcess();
+	afx_msg void OnBnClickedBtnMakePattern();
+	afx_msg void OnBnClickedBtnGetData();
+	afx_msg void OnEnChangeEditCircleSize();
+	afx_msg void OnBnClickedBtnMakeCircle();
 };

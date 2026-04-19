@@ -80,14 +80,12 @@ BOOL CDlgImage::OnInitDialog()
 		CRect rect;
 
 		CPen pen;
-		pen.CreatePen(PS_SOLID, 5, COLOR_GREEN); // 펜 객체 생성 - 초록색, 두께 5
+		pen.CreatePen(PS_SOLID, 2, COLOR_RED); // 펜 객체 생성 - 초록색, 두께 5
 		CPen* pOldPen = pDC->SelectObject(&pen); // 펜 객체를 디바이스 컨텍스트에 선택하여 사용 준비
 
 		for (int i = 0; i < m_nDataCount; i++) {
 			rect.SetRect(m_ptData[i], m_ptData[i]);
-			//rect.InflateRect(2, 4); // 타원의 크기를 확대합니다. (2, 4)만큼 사각형을 확장
-			//rect.InflateRect(4, 2); // 타원의 크기를 확대합니다. (4, 2)만큼 사각형을 확장
-			rect.InflateRect(2, 2); // 원의 크기를 확대합니다. (2, 2)만큼 사각형을 확장
+			rect.InflateRect(m_nCircleSize, m_nCircleSize);
 			pDC->Ellipse(rect); // 타원을 그립니다. 	
 		}
 
@@ -102,8 +100,9 @@ BOOL CDlgImage::OnInitDialog()
 			m_image.Destroy();
 		}
 
-		int nWidth = 640;
-		int nHeight = 480;
+		// <chrono> auto 시간 측정 시 이미지가 너무 작아 측정이 어려울 수 있으므로, 이미지 크기를 크게 설정하여 측정이 용이하도록 합니다.
+		int nWidth = 4096 * 10; 
+		int nHeight = 4096 * 10;
 		int nBpp = 8;
 
 		m_image.Create(nWidth, -nHeight, nBpp); // 설정한 규격대로 메모리에 이미지 공간을 생성합니다.
