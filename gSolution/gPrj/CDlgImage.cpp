@@ -101,8 +101,8 @@ BOOL CDlgImage::OnInitDialog()
 		}
 
 		// <chrono> auto 시간 측정 시 이미지가 너무 작아 측정이 어려울 수 있으므로, 이미지 크기를 크게 설정하여 측정이 용이하도록 합니다.
-		int nWidth = 4096 * 10; 
-		int nHeight = 4096 * 10;
+		int nWidth = 4096 * 8; 
+		int nHeight = 4096 * 8;
 		int nBpp = 8;
 
 		m_image.Create(nWidth, -nHeight, nBpp); // 설정한 규격대로 메모리에 이미지 공간을 생성합니다.

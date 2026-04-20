@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_GET_DATA, &CgPrjDlg::OnBnClickedBtnGetData)
 	ON_EN_CHANGE(IDC_EDIT_CIRCLE_SIZE, &CgPrjDlg::OnEnChangeEditCircleSize)
 	ON_BN_CLICKED(IDC_BTN_MAKE_CIRCLE, &CgPrjDlg::OnBnClickedBtnMakeCircle)
+	ON_BN_CLICKED(IDC_BTN_THREAD, &CgPrjDlg::OnBnClickedBtnThread)
 END_MESSAGE_MAP()
 
 
@@ -201,8 +202,14 @@ void CgPrjDlg::CallFunc(int n)
 
 void CgPrjDlg::OnBnClickedBtnTest() {
 
+	if (m_pDlgImage == nullptr || m_pDlgImage->m_image.IsNull()) {
+		AfxMessageBox(_T("이미지가 생성되지 않았습니다."));
+		return;
+	}
+
 	// 1. 이미지 데이터의 시작 지점(포인터)을 가져옵니다.
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+	if (fm == nullptr) return;
 
 	// 2. 이미지의 가로, 세로 크기와 데이터 한 줄의 길이(Pitch)를 파악합니다.
 	int nWidth = m_pDlgImage->m_image.GetWidth();
@@ -250,18 +257,21 @@ void CgPrjDlg::OnBnClickedBtnTest() {
 }
 #include "CProcess.h"
 #include <chrono>
+
+using namespace std::chrono; // system_clock, duration_cast, milliseconds
+
 void CgPrjDlg::OnBnClickedBtnProcess()
 {
 	CProcess process; // CProcess 클래스의 객체를 생성합니다.
 	
-	auto start = std::chrono::system_clock::now(); // 시작 시간 기록
+	auto start = system_clock::now(); // 시작 시간 기록
 	
 	int nRet = process.getStarInfo(m_pDlgImage->m_image); // default nThreshold = 100 이어서 입력값 생략 가능 
 	// int nRet = process.getStarInfo(m_pDlgImage->m_image, nThreshold);
 
-	auto end = std::chrono::system_clock::now(); // 종료 시간 기록
+	auto end = system_clock::now(); // 종료 시간 기록
 
-	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start); // 경과 시간 계산 (밀리초 단위)
+	auto milliseconds = duration_cast<std::chrono::milliseconds>(end - start); // 경과 시간 계산 (밀리초 단위)
 
 	cout << nRet << "\t" << milliseconds.count() << "ms" << endl;
 
@@ -322,16 +332,117 @@ void CgPrjDlg::OnBnClickedBtnGetData()
 	// make pattern - 0x81 -(149.5, 149.5) // 0x81로 패턴을 만들 때는 정확하게 (149.5, 149.5)가 나옴.
 }
 
+#include <thread> //
+#include <chrono> // system_clock, duration_cast, milliseconds
+using namespace std; 
+using namespace chrono; 
+
+// threadProcess 가 call 하는 함수
+int CgPrjDlg::processImage(CRect rect) {
+	auto start = system_clock::now();
+
+	CProcess process; // CProcess 클래스의 객체를 생성합니다.
+
+	int nRet = process.getStarInfo(m_pDlgImage->m_image, 0, rect);  // 2번째 인자 = 밝기 임계값
+// CProcess 클래스의 getStarInfo 함수를 호출하여 해당 영역을 처리합니다.	
+	auto end = system_clock::now();
+	auto ms = duration_cast<std::chrono::milliseconds>(end - start);
+	std::cout << nRet << "\t" << ms.count() << "ms" << std::endl;
+	return nRet;
+}
+
+// OnBnClickedBtnThread 에서 call 하는 함수
+void threadProcess(CWnd* pParent, CRect rect, int* pRet) { // int* pRet (포인터로 받기)
+	CgPrjDlg* pWnd = (CgPrjDlg*)pParent;
+	*pRet = pWnd->processImage(rect); // *pRet (해당 주소에 결과 저장)
+
+}
 
 
-void CgPrjDlg::OnEnChangeEditCircleSize()
+void CgPrjDlg::OnBnClickedBtnThread()
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CDialogEx::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// ENM_CHANGE가 있으면 마스크에 ORed를 플래그합니다.
+	if (m_pDlgImage == nullptr || m_pDlgImage->m_image.IsNull()) {
+		AfxMessageBox(_T("이미지가 생성되지 않았습니다."));
+		return;
+	}
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	auto start = system_clock::now(); // 메인 시작
+
+	/* [주의] 아래 방식은 이미지 크기가 항상 32768(4096*8)이라고 가정하는 위험한 방식입니다. 
+	   이미지 크기가 바뀌면 영역이 어긋나거나 메모리 위반 에러가 발생할 수 있습니다. */
+	int nImgSize = 4096 * 4; 
+	CRect rect(0, 0, nImgSize, nImgSize); // 처리할 단위 영역 크기 세팅
+	CRect rt[4];
+	int nRet[4] = { 0, 0, 0, 0 };
+
+	for (int k = 0; k < 4; k++) {
+		rt[k] = rect; 
+		// 단위 크기(nImgSize)만큼씩 이동시켜 4등분 영역을 잡습니다.
+		rt[k].OffsetRect(nImgSize * (k % 2), nImgSize * int(k / 2));
+	}
+
+	// 4개의 별도 쓰레드 생성
+	thread _thread0(threadProcess, this, rt[0], &nRet[0]);
+	thread _thread1(threadProcess, this, rt[1], &nRet[1]);
+	thread _thread2(threadProcess, this, rt[2], &nRet[2]);
+	thread _thread3(threadProcess, this, rt[3], &nRet[3]);
+
+	// OnBnClickedBtnThread 종료시간에 영향을 줌
+	// 작업들 끼리 순서가연관이 있는 경우 사용
+	// 보냈다가 (다음작업에서) 결과를 기다려야 하는 경우 사용
+	// 당구공이 쿠션에 맞고 오는 시간 기다리기
+	//_thread0.join();
+	//_thread1.join();
+	//_thread2.join();
+	//_thread3.join();
+
+	// OnBnClickedBtnThread 자체는 1ms도 안걸림
+	// 작업들 끼리 연관이 없기 때문에 이미지나 텍스트 저장 시 사용하면 좋음 
+	// 당구공과 당구공이 다른 테이블에 있다면
+	_thread0.detach();
+	_thread1.detach();
+	_thread2.detach();
+	_thread3.detach();
+
+	int nSum = 0;
+	for (int i = 0; i < 4; i++)
+		nSum += nRet[i];
+
+	auto end = system_clock::now(); // 메인 종료
+	auto ms = duration_cast<std::chrono::milliseconds>(end - start);
+
+	std::cout << "Thread Total Count: " << nSum << " \t Time: " << ms.count() << "ms" << std::endl;
+}
+
+
+
+
+
+
+
+
+
+
+BOOL CgPrjDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// 1. 키보드가 눌렸는지 확인
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// 2. 그 키가 엔터(Enter) 키인지 확인
+		if (pMsg->wParam == VK_RETURN)
+		{
+			// 3. 현재 포커스가 우리가 원하는 Edit 컨트롤에 있는지 확인
+			if (GetFocus() == GetDlgItem(IDC_EDIT_CIRCLE_SIZE))
+			{
+				// 엔터 키를 쳤을 때 실행하고 싶은 버튼 함수를 직접 호출합니다.
+				OnBnClickedBtnMakeCircle();
+
+				// TRUE를 반환하여 더 이상의 메시지 처리(예: 확인 버튼 누름 등)를 막습니다.
+				return TRUE;
+			}
+		}
+	}
+	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
 void CgPrjDlg::OnBnClickedBtnMakeCircle()
@@ -355,4 +466,10 @@ void CgPrjDlg::OnBnClickedBtnMakeCircle()
 	// 3. 출력 및 갱신
 	cout << "size: " << nSize << " / center: (" << dSumX / nNum << "," << dSumY / nNum << ")" << endl;
 	m_pDlgImage->Invalidate();
+}
+
+
+void CgPrjDlg::OnEnChangeEditCircleSize()
+{
+	// 지금은 버튼으로 동작하므로 여기는 비워두셔도 됩니다.
 }

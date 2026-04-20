@@ -17,8 +17,9 @@
 #define IDC_BTN_GET_DATA                1005
 #define IDC_EDIT                        1006
 #define IDC_EDIT_CIRCLE_SIZE            1006
-#define IDC_BTN_GET_DATA2               1007
 #define IDC_BTN_MAKE_CIRCLE             1007
+#define IDC_BTN_GET_DATA2               1008
+#define IDC_BTN_THREAD                  1008
 
 // Next default values for new objects
 // 

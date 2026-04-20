@@ -37,6 +37,10 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
+	virtual BOOL PreTranslateMessage(MSG* pMsg); // 이 줄을 추가합니다.
+
+
 public:
 //	afx_msg void OnBnClickedBtnDlg();
 	afx_msg void OnDestroy();
@@ -48,4 +52,7 @@ public:
 	afx_msg void OnBnClickedBtnGetData();
 	afx_msg void OnEnChangeEditCircleSize();
 	afx_msg void OnBnClickedBtnMakeCircle();
+	afx_msg void OnBnClickedBtnThread();
+	int processImage(CRect rect);
 };
+
